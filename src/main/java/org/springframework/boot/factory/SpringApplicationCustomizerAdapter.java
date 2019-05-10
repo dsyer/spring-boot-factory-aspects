@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.example;
+package org.springframework.boot.factory;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,6 +43,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -53,8 +55,6 @@ public class SpringApplicationCustomizerAdapter {
 	private static Map<Class<?>, Set<String>> mappings = new HashMap<>();
 
 	private static Set<Class<?>> mapped = new HashSet<>();
-
-	private Class<?>[] primarySources;
 
 	private SpringApplication application;
 
@@ -70,20 +70,27 @@ public class SpringApplicationCustomizerAdapter {
 		mappings.clear();
 	}
 
-	public SpringApplicationCustomizerAdapter(SpringApplication application,
-			Class<?>[] primarySources) {
+	public SpringApplicationCustomizerAdapter(SpringApplication application) {
 		this.application = application;
-		this.primarySources = primarySources;
-		stash(primarySources);
 	}
 
 	public void customize() {
+		Class<?>[] primarySources = getField(this.application, "primarySources");
+		stash(primarySources);
 		if (!SpringApplicationCustomizerAdapter.mappings.isEmpty()) {
 			for (SpringApplicationCustomizer customizer : factories(primarySources,
 					SpringApplicationCustomizer.class)) {
 				customizer.customize(this.application);
 			}
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Class<?>[] getField(Object target, String name) {
+		Field field = ReflectionUtils.findField(target.getClass(), name);
+		ReflectionUtils.makeAccessible(field);
+		return ((Set<Class<?>>) ReflectionUtils.getField(field, target))
+				.toArray(new Class<?>[0]);
 	}
 
 	private <T> Collection<? extends T> factories(Class<?>[] sources, Class<T> type) {

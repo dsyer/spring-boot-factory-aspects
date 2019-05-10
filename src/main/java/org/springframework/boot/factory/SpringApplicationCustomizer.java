@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.example;
+package org.springframework.boot.factory;
 
 import org.springframework.boot.SpringApplication;
 

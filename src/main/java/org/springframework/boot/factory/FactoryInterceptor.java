@@ -1,11 +1,11 @@
-package com.example;
+package org.springframework.boot.factory;
 
 import java.util.Properties;
 
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContextInitializer;
@@ -30,10 +30,10 @@ public class FactoryInterceptor {
 		return result;
 	}
 
-	@After("execution(org.springframework.boot.SpringApplication+.new(..)) "
-			+ "&& target(application) && args(sources)")
-	public void run(SpringApplication application, Class<?>[] sources) throws Throwable {
-		new SpringApplicationCustomizerAdapter(application, sources).customize();
+	@Before("execution(org.springframework.context.ConfigurableApplicationContext org.springframework.boot.SpringApplication+.run(..)) "
+			+ "&& this(application)")
+	public void run(SpringApplication application) throws Throwable {
+		new SpringApplicationCustomizerAdapter(application).customize();
 	}
 
 }

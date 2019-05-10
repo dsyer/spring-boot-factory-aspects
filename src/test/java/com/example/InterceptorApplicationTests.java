@@ -3,16 +3,12 @@ package com.example;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import org.springframework.boot.factory.CustomizedSpringRunner;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
+@RunWith(CustomizedSpringRunner.class)
 @SpringBootTest
 public class InterceptorApplicationTests {
-
-	static {
-		AgentInstaller.install();
-	}
 
 	@Test
 	public void contextLoads() {
