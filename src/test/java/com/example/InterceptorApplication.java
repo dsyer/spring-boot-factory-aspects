@@ -27,7 +27,7 @@ public class InterceptorApplication {
 
 	public static void main(String[] args) {
 		AgentInstaller.install();
-		FactorySpringApplication.run(InterceptorApplication.class, args);
+		SpringApplication.run(InterceptorApplication.class, args);
 	}
 
 }

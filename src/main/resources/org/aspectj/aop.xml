@@ -3,6 +3,7 @@
 	<weaver options="-verbose">
 		<include within="com.example..*" />
 		<include within="org.springframework.core.io.support..*" />
+		<include within="org.springframework.boot.*" />
 	</weaver>
 
 	<aspects>

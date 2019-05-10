@@ -17,6 +17,7 @@ package com.example;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,10 +33,8 @@ import java.util.Set;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.boot.SpringApplication;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.UrlResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.lang.Nullable;
@@ -44,19 +43,22 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
  * @author Dave Syer
  *
  */
-public class FactorySpringApplication extends SpringApplication {
+public class SpringApplicationCustomizerAdapter {
 
 	private static Map<Class<?>, Set<String>> mappings = new HashMap<>();
 
 	private static Set<Class<?>> mapped = new HashSet<>();
 
 	private Class<?>[] primarySources;
+
+	private SpringApplication application;
 
 	public static Collection<String> loadFactoryNames(Class<?> key) {
 		if (mappings.containsKey(key)) {
@@ -70,42 +72,38 @@ public class FactorySpringApplication extends SpringApplication {
 		mappings.clear();
 	}
 
-	public static ConfigurableApplicationContext run(Class<?> primarySource,
-			String... args) {
-		return run(new Class<?>[] { primarySource }, args);
+	public SpringApplicationCustomizerAdapter(SpringApplication application) {
+		this.application = application;
+		this.primarySources = primarySources(application);
+		stash(primarySources);
 	}
 
-	public static ConfigurableApplicationContext run(Class<?>[] primarySources,
-			String[] args) {
-		return new FactorySpringApplication(primarySources).run(args);
+	private Class<?>[] primarySources(SpringApplication application) {
+		return getField(application, "primarySources");
 	}
 
-	public FactorySpringApplication(Class<?>... primarySources) {
-		this(null, primarySources);
+	@SuppressWarnings("unchecked")
+	private static Class<?>[] getField(Object target, String name) {
+		Field field = ReflectionUtils.findField(target.getClass(), name);
+		ReflectionUtils.makeAccessible(field);
+		return ((Set<Class<?>>) ReflectionUtils.getField(field, target))
+				.toArray(new Class<?>[0]);
 	}
 
-	public FactorySpringApplication(ResourceLoader resourceLoader,
-			Class<?>... primarySources) {
-		super(resourceLoader, stash(primarySources));
-		this.primarySources = primarySources;
-	}
-
-	@Override
-	public ConfigurableApplicationContext run(String... args) {
-		if (!FactorySpringApplication.mappings.isEmpty()) {
+	public void customize(String... args) {
+		if (!SpringApplicationCustomizerAdapter.mappings.isEmpty()) {
 			for (SpringApplicationCustomizer customizer : factories(primarySources,
 					SpringApplicationCustomizer.class)) {
-				customizer.customize(this, args);
+				customizer.customize(this.application, args);
 			}
 		}
-		return super.run(args);
 	}
 
 	private <T> Collection<? extends T> factories(Class<?>[] sources, Class<T> type) {
 		List<T> result = new ArrayList<>();
 		for (Class<?> source : sources) {
-			if (FactorySpringApplication.mappings.containsKey(source)) {
-				Set<String> map = FactorySpringApplication.mappings.get(source);
+			if (SpringApplicationCustomizerAdapter.mappings.containsKey(source)) {
+				Set<String> map = SpringApplicationCustomizerAdapter.mappings.get(source);
 				result.addAll(createSpringFactoriesInstances(type, null, map));
 			}
 		}
@@ -165,7 +163,7 @@ public class FactorySpringApplication extends SpringApplication {
 	private static void resolveFactories(Class<?> type,
 			SpringApplicationCustomizers factories) {
 		for (Class<?> attrs : findSelected(factories)) {
-			FactorySpringApplication.mappings
+			SpringApplicationCustomizerAdapter.mappings
 					.computeIfAbsent(type, k -> new LinkedHashSet<>())
 					.add(attrs.getName());
 		}
