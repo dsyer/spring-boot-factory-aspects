@@ -1,23 +1,24 @@
-package com.example;
+package com.example.config;
 
 import org.aspectj.lang.Aspects;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.BackgroundPreinitializer;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.config.SpringBootFeaturesApplication;
+import org.springframework.boot.config.WebFluxConfigurations;
 import org.springframework.boot.context.ContextIdApplicationContextInitializer;
 import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
+import org.springframework.boot.customizer.SpringApplicationCustomizer;
+import org.springframework.boot.customizer.SpringApplicationCustomizers;
 import org.springframework.boot.factory.AgentInstaller;
 import org.springframework.boot.factory.FactoryInterceptor;
-import org.springframework.boot.factory.SpringApplicationCustomizer;
-import org.springframework.boot.factory.SpringApplicationCustomizers;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@SpringBootApplication(proxyBeanMethods = false)
+@SpringBootFeaturesApplication(WebFluxConfigurations.class)
 @RestController
 @SpringApplicationCustomizers(SimpleFactories.class)
 public class InterceptorApplication {
