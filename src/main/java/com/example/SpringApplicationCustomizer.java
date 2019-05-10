@@ -24,5 +24,6 @@ import org.springframework.boot.SpringApplication;
  */
 public interface SpringApplicationCustomizer {
 
-	void customize(SpringApplication application, String[] args);
+	void customize(SpringApplication application);
+
 }

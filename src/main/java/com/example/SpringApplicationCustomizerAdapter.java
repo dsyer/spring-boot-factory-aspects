@@ -17,7 +17,6 @@ package com.example;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,7 +42,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -72,29 +70,18 @@ public class SpringApplicationCustomizerAdapter {
 		mappings.clear();
 	}
 
-	public SpringApplicationCustomizerAdapter(SpringApplication application) {
+	public SpringApplicationCustomizerAdapter(SpringApplication application,
+			Class<?>[] primarySources) {
 		this.application = application;
-		this.primarySources = primarySources(application);
+		this.primarySources = primarySources;
 		stash(primarySources);
 	}
 
-	private Class<?>[] primarySources(SpringApplication application) {
-		return getField(application, "primarySources");
-	}
-
-	@SuppressWarnings("unchecked")
-	private static Class<?>[] getField(Object target, String name) {
-		Field field = ReflectionUtils.findField(target.getClass(), name);
-		ReflectionUtils.makeAccessible(field);
-		return ((Set<Class<?>>) ReflectionUtils.getField(field, target))
-				.toArray(new Class<?>[0]);
-	}
-
-	public void customize(String... args) {
+	public void customize() {
 		if (!SpringApplicationCustomizerAdapter.mappings.isEmpty()) {
 			for (SpringApplicationCustomizer customizer : factories(primarySources,
 					SpringApplicationCustomizer.class)) {
-				customizer.customize(this.application, args);
+				customizer.customize(this.application);
 			}
 		}
 	}

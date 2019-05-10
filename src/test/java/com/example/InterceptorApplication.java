@@ -47,7 +47,7 @@ class CheckAspectsConfiguration {
 class SimpleFactories implements SpringApplicationCustomizer {
 
 	@Override
-	public void customize(SpringApplication application, String[] args) {
+	public void customize(SpringApplication application) {
 		System.err.println("Customizing SpringApplication");
 		application.setListeners(Arrays.asList(new BackgroundPreinitializer(),
 				new ConfigFileApplicationListener(), new LoggingApplicationListener()));
