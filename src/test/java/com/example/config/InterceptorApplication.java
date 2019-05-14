@@ -11,7 +11,6 @@ import org.springframework.boot.context.config.ConfigFileApplicationListener;
 import org.springframework.boot.context.logging.LoggingApplicationListener;
 import org.springframework.boot.customizer.SpringApplicationCustomizer;
 import org.springframework.boot.customizer.SpringApplicationCustomizers;
-import org.springframework.boot.factory.AgentInstaller;
 import org.springframework.boot.factory.FactoryInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +28,7 @@ public class InterceptorApplication {
 	}
 
 	public static void main(String[] args) {
-		AgentInstaller.install();
+		// AgentInstaller.install();
 		SpringApplication.run(InterceptorApplication.class, args);
 	}
 
