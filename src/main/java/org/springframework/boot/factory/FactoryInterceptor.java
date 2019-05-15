@@ -1,6 +1,9 @@
 package org.springframework.boot.factory;
 
-import java.util.Properties;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -14,20 +17,19 @@ import org.springframework.context.ApplicationListener;
 @Aspect
 public class FactoryInterceptor {
 
-	private static final String[] EXCLUDES = { ApplicationListener.class.getName(),
-			ApplicationContextInitializer.class.getName() };
+	private static final Set<String> EXCLUDES = new HashSet<>(
+			Arrays.asList(ApplicationListener.class.getName(),
+					ApplicationContextInitializer.class.getName()));
 
-	@Around("execution(java.util.Properties org.springframework.core.io.support.PropertiesLoaderUtils.loadProperties(..))")
-	public Object stack(ProceedingJoinPoint joinPoint) throws Throwable {
-		Properties proceed = (Properties) joinPoint.proceed();
-		Properties result = new Properties();
-		result.putAll(proceed);
-		for (String name : EXCLUDES) {
-			if (proceed.containsKey(name)) {
-				result.remove(name);
-			}
+	@Around("execution(* org.springframework.boot.SpringApplication.createSpringFactoriesInstances(..))"
+			+ " && args(type, .., names)")
+	public Object instances(ProceedingJoinPoint joinPoint, Class<?> type,
+			Set<String> names) throws Throwable {
+		String name = type.getName();
+		if (EXCLUDES.contains(name)) {
+			return Collections.emptyList();
 		}
-		return result;
+		return joinPoint.proceed();
 	}
 
 	@Before("execution(org.springframework.context.ConfigurableApplicationContext org.springframework.boot.SpringApplication+.run(..)) "
