@@ -34,11 +34,6 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-core</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 			<optional>true</optional>
@@ -95,10 +90,6 @@
 						<weaveDependency>
 							<groupId>org.springframework.boot</groupId>
 							<artifactId>spring-boot</artifactId>
-						</weaveDependency>
-						<weaveDependency>
-							<groupId>org.springframework</groupId>
-							<artifactId>spring-core</artifactId>
 						</weaveDependency>
 					</weaveDependencies>
 					<complianceLevel>${java.version}</complianceLevel>
